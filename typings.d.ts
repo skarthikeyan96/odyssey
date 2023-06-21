@@ -1,3 +1,4 @@
+declare module 'jsonwebtoken';
 declare namespace JSX {
     import { PassageElement, PassageProfileElement } from '@passageidentity/passage-elements'
     interface IntrinsicElements {
@@ -5,3 +6,4 @@ declare namespace JSX {
         "passage-profile": PassageProfileElement;
     }
 }
+
