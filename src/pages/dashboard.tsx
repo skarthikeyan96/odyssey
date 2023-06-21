@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import Router from 'next/router';
 import { getAuthenticatedUserFromSession } from '@/utils/passage'
 import { PassageUser } from '@passageidentity/passage-elements/passage-user'
+import Link from 'next/link';
 
 export default function Dashboard({isAuthorized, userID}: any) {
     useEffect(() => {
@@ -9,7 +10,7 @@ export default function Dashboard({isAuthorized, userID}: any) {
         Router.push('/');
       }
     })
-    
+
     const signOut = async ()=>{
         new PassageUser().signOut()
         Router.push('/')
@@ -21,6 +22,7 @@ export default function Dashboard({isAuthorized, userID}: any) {
           Welcome {userID}!{' '}
         </h1>
         <br></br>
+        <Link href="/profile"> Profile </Link>
         <button onClick={signOut}>Sign Out</button>
       </div>
     )
