@@ -75,9 +75,14 @@ export const getServerSideProps = async (context: any) => {
     };
   }
   return {
-    props: {
-      isAuthorized: loginProps?.isAuthorized ?? false,
-      userID: loginProps?.userId ?? "",
-    },
+    redirect: {
+      permanent: false,
+      destination: "/"
+    }
+   
+    // props: {
+    //   isAuthorized: loginProps?.isAuthorized ?? false,
+    //   userID: loginProps?.userId ?? "",
+    // },
   };
 };
