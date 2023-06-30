@@ -1,44 +1,67 @@
 import { getAuthenticatedUserFromSession } from "@/utils/passage";
 import { getSupabase } from "@/utils/supabase";
 import { PassageUser } from "@passageidentity/passage-elements/passage-user";
-import React from "react";
+import React, { Fragment } from "react";
 import ReactMarkdown from "react-markdown";
 import { Editor } from "@monaco-editor/react";
 import { useRouter } from "next/router";
 import Navbar from "@/components/navbar";
+import { Dialog, Transition } from '@headlessui/react'
 
 const New = ({ isAuthorized, userID, journals }: any) => {
 
   const router = useRouter();
+  const [journalTitle, setJournalTitle] = React.useState("");
+  const [markdownContent, setMarkdownContent] = React.useState("");
+  const [openModal, setOpenModal] = React.useState(false)
+  const [pageId, setPageId] = React.useState('');
   
 
   const handleSubmit = async (e: any) => {
-    const data1 = await new PassageUser().userInfo();
-    console.log(data1);
-    const data = new FormData(e.target);
-    const title = data.get("title");
-    const description = data.get("description");
-    const res = await fetch("/api/addJournal", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        userID,
-        username: data1?.user_metadata?.username,
-      }),
-    }).then((res) => res.json());
+    const info = await new PassageUser().userInfo();
+
+    try {
+      const response = await fetch("/api/addJournal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: journalTitle,
+          description: markdownContent,
+          userID,
+          username: info?.user_metadata?.username,
+        }),
+      })
+
+      const data = await response.json()
+      console.log(data)
+    } catch (error) {
+      console.log(error)
+    }
+    
   };
 
   const handleCancel = () => {
     router.push('/dashboard')
   }
-  const [journalTitle, setJournalTitle] = React.useState("");
-  const [markdownContent, setMarkdownContent] = React.useState("");
-
+ 
   const handleEditorChange = (value: any) => setMarkdownContent(value);
+
+  
+  
+  const handleGetNotionContent = async () => {
+   const response =  await fetch('/api/getNotionContent', {
+    method: "GET",
+    body: JSON.stringify({
+      pageId: "a80ec71bc9114f1a8a6af6c481b99fdd"
+    })
+   });
+   const {data} = await response.json();
+   setMarkdownContent(data)
+    setOpenModal(false)
+  }
+
 
   return (
     <>
@@ -57,6 +80,61 @@ const New = ({ isAuthorized, userID, journals }: any) => {
         <button>Submit</button>
       </form> */}
       <Navbar/>
+
+      <Transition appear show={openModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={() => setOpenModal(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Payment successful
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      Your payment has been successfully submitted. We’ve sent
+                      you an email with all of the details of your order.
+                    </p>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={handleGetNotionContent}
+                    >
+                      Got it, thanks!
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
       <div className="mx-auto mt-8 pl-8 pr-8 container">
         <div className="flex">
           <div className="grow">
@@ -75,6 +153,12 @@ const New = ({ isAuthorized, userID, journals }: any) => {
               <button onClick={handleCancel} className="py-1.5 whitespace-nowrap focus:outline-none inline-flex bg-fill-3 dark:bg-dark-fill-3 hover:bg-fill-2 dark:hover:bg-dark-fill-2 text-label-2 dark:text-dark-label-2 h-8 items-center rounded-lg px-4 text-md font-medium">
                 Cancel
               </button>
+
+              <button onClick={() => setOpenModal(true)}           className="rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                Upload from Notion
+              </button>
+
+
               <button
                 onClick={handleSubmit}
                 className="py-1.5 whitespace-nowrap flex h-8 items-center gap-1 rounded-lg px-4 text-md font-medium border"
@@ -299,15 +383,7 @@ const New = ({ isAuthorized, userID, journals }: any) => {
                 <path d="M5.941 13.5c.659 0 1.18-.194 1.564-.582.439-.387.63-.886.63-1.495 0-.61-.191-1.08-.575-1.468a1.983 1.983 0 00-1.427-.609c-.301 0-.52.056-.658.11 0-.664.22-1.3.686-1.938a4.098 4.098 0 011.838-1.301V4.5c-1.372.388-2.47 1.08-3.292 2.132C3.911 7.685 3.5 8.931 3.5 10.315c0 .942.247 1.717.686 2.299.466.61 1.042.886 1.755.886zm6.392 0c.658 0 1.18-.194 1.59-.582.385-.387.577-.886.577-1.495 0-.61-.192-1.08-.604-1.468-.384-.387-.85-.609-1.399-.609-.301 0-.52.056-.658.11 0-.664.22-1.3.713-1.938.494-.609 1.098-1.052 1.838-1.301V4.5c-1.371.388-2.469 1.08-3.292 2.132-.822 1.053-1.234 2.299-1.234 3.683 0 .942.247 1.717.713 2.299.44.61 1.043.886 1.756.886z"></path>
               </svg>
             </button>
-          </div>
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            className="no-underline hover:text-blue-s dark:hover:text-dark-blue-s truncate hover:bg-fill-3 dark:hover:bg-dark-fill-3 flex h-6 w-6 items-center justify-center rounded-[5px]"
-            href="/markdown-guide/"
-          >
-            💡
-          </a>
+          </div> 
         </div>
 
         <div className="h-[calc(100vh_-_15rem)] flex">
@@ -317,7 +393,6 @@ const New = ({ isAuthorized, userID, journals }: any) => {
               className="border rounded-lg w-full "
               defaultLanguage="markdown"
               value={markdownContent}
-              defaultValue="Paste your markdown content below"
               onChange={handleEditorChange}
               options={{
                 lineNumbers: "off",
@@ -359,9 +434,14 @@ export const getServerSideProps = async (context: any) => {
     };
   }
   return {
-    props: {
-      isAuthorized: loginProps?.isAuthorized ?? false,
-      userID: loginProps?.userId ?? "",
-    },
+    redirect: {
+      permanent: false,
+      destination: "/"
+    }
+   
+    // props: {
+    //   isAuthorized: loginProps?.isAuthorized ?? false,
+    //   userID: loginProps?.userId ?? "",
+    // },
   };
 };

@@ -1,8 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PostgrestError } from "@supabase/supabase-js";
 import { getSupabase } from "../../utils/supabase";
 
-export default async function handler(req: any, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: PostgrestError): void; new(): any; }; }; }) {
+export default async function handler(req: any, res: any) {
   const { userID, title, description, username } = req.body;
   const supabase:any = getSupabase(userID);
   console.log("" , userID, title, description)
