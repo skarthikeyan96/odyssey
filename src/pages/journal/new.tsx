@@ -15,7 +15,7 @@ const New = ({ isAuthorized, userID, journals }: any) => {
   const [markdownContent, setMarkdownContent] = React.useState("");
   const [openModal, setOpenModal] = React.useState(false)
   const [pageId, setPageId] = React.useState('');
-  
+
 
   const handleSubmit = async (e: any) => {
     const info = await new PassageUser().userInfo();
@@ -65,21 +65,8 @@ const New = ({ isAuthorized, userID, journals }: any) => {
 
   return (
     <>
-      {/* <p> Add a new journal </p>
 
-      <form onSubmit={handleSubmit} className="flex">
-        <label>title</label>
-
-        <input type="text" name="title" className="border p-2" />
-
-        <br />
-        <label>description</label>
-
-        <textarea className="border" name="description" rows={4} cols={50} />
-
-        <button>Submit</button>
-      </form> */}
-      <Navbar/>
+    
 
       <Transition appear show={openModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={() => setOpenModal(false)}>

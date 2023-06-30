@@ -1,27 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Router from "next/router";
 import { getAuthenticatedUserFromSession } from "@/utils/passage";
-import { PassageUser } from "@passageidentity/passage-elements/passage-user";
 import Link from "next/link";
 import { getSupabase } from "@/utils/supabase";
 
 export default function Dashboard({ isAuthorized, userID, journals }: any) {
+
   useEffect(() => {
     if (!isAuthorized) {
       Router.push("/");
     }
   });
 
-  const signOut = async () => {
-    new PassageUser().signOut();
-    Router.push("/");
-  };
-
+ 
   const handleDelete = async (id: string) => {
-    // const supabase: any = getSupabase(userID);
-
-    // await supabase(userID).from("journal").delete().eq("id", id);
-
     const res = await fetch("/api/deleteJournal", {
         method: "POST",
         headers: {
@@ -35,8 +27,15 @@ export default function Dashboard({ isAuthorized, userID, journals }: any) {
 
   return (
     <div>
+    
+
+      <div className="container mx-auto p-5">
       <h1>Welcome {userID}! </h1>
-      <br></br>
+      </div>
+    
+     
+
+      
 
       {journals.map((journal: any) => {
         return (
@@ -48,11 +47,8 @@ export default function Dashboard({ isAuthorized, userID, journals }: any) {
         );
       })}
       <br />
-      <Link href="/profile"> Profile </Link>
-      <br />
-      <Link href="/journal/new"> Add a new journal </Link>
-      <br />
-      <button onClick={signOut}>Sign Out</button>
+     
+    
     </div>
   );
 }
@@ -65,6 +61,7 @@ export const getServerSideProps = async (context: any) => {
 
   if (loginProps?.isAuthorized) {
     const supabase: any = getSupabase(loginProps.userId);
+    console.log(loginProps)
     const { data } = await supabase.from("journal").select();
     return {
       props: {
