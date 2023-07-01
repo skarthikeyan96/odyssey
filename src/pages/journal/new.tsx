@@ -59,14 +59,14 @@ const New = ({ isAuthorized, userID, journals }: any) => {
    });
    const {data} = await response.json();
    setMarkdownContent(data)
-    setOpenModal(false)
+   setOpenModal(false)
   }
 
 
   return (
     <>
 
-    
+<Navbar/>
 
       <Transition appear show={openModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={() => setOpenModal(false)}>
